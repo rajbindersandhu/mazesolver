@@ -25,9 +25,9 @@ class Maze:
             random.seed(seed)
         self._create_cell_list()
         self._break_entrance_and_exit()
-        print("Building Maze...")
         self._break_walls_r(0,0)
-        print("Maze is ready!!!")
+        self._draw_cell()
+        self._reset_cell_visited()
 
     def _create_cell_list(self):
         top_left_x = self.x1
@@ -49,30 +49,37 @@ class Maze:
         
         self._draw_cell()
 
+    def _draw_single_cell(self, i,j):
+        if self.window:
+            cell = self.cell_list[i][j]
+            cell.draw()
+            self._animate(0.005)
+        else: return
+
     def _draw_cell(self):
         if self.window:
             for i in range(self.num_rows):
                 for j in range(self.num_cols):
                     cell = self.cell_list[i][j]
                     cell.draw()
-                    self._animate()
+                    self._animate(0.005)
         else:
             return
     
-    def _animate(self):
+    def _animate(self, timeout):
         if self.window is None:
             return
         self.window.redraw()
-        # time.sleep(0.00005)
+        time.sleep(timeout)
 
     def _break_entrance_and_exit(self):
         if self.cell_list:
             top_left_cell = self.cell_list[0][0]
             top_left_cell.has_top_wall = False
-            self._draw_cell()
+            self._draw_single_cell(0,0)
             bottom_right_cell = self.cell_list[self.num_rows-1][self.num_cols-1]
             bottom_right_cell.has_bottom_wall = False
-            self._draw_cell()
+            self._draw_single_cell(self.num_rows-1, self.num_cols-1)
 
     
     def _break_walls_r(self, i,j):
@@ -139,7 +146,6 @@ class Maze:
                     options.append((i, j - 1))
         
             if len(options) == 0:
-                self._draw_cell()
                 return
         
             selected_cell = random.choice(options)
@@ -156,3 +162,79 @@ class Maze:
                 self.cell_list[i][j].has_right_wall = False
                 self.cell_list[selected_cell[0]][selected_cell[1]].has_left_wall = False
             self._break_walls_r(selected_cell[0], selected_cell[1])
+    
+    def _reset_cell_visited(self):
+        for i in range(self.num_rows):
+            for j in range(self.num_cols):
+                cell = self.cell_list[i][j]
+                cell.visited = False
+
+    def solve(self, search_algo = "DFS"):
+        if search_algo == "DFS":
+            return self._solve_dfs_r(0,0)
+        elif search_algo == "BFS":
+            return self._solve_bfs(0,0)
+        else:
+            raise Exception("Invalid search algorithm. Choose only from DFS or BFS")
+
+    def _solve_dfs_r(self,i,j):
+        self._animate(0.05)
+        self.cell_list[i][j].visited = True
+        if i==self.num_rows-1 and j==self.num_cols-1:
+            return True
+
+        for direction in [(i+1,j), (i-1,j), (i, j+1), (i,j-1)]:
+            if(direction[0]>=0 and direction[0]<=self.num_rows-1 and direction[1]>=0 and direction[1]<=self.num_cols-1):
+                if not self.cell_list[direction[0]][direction[1]].visited:
+                    if direction[0] == i-1 and self.cell_list[i][j].has_top_wall:
+                        continue
+                    elif direction[0] == i+1 and self.cell_list[i][j].has_bottom_wall:
+                        continue
+                    elif direction[1] == j-1 and self.cell_list[i][j].has_left_wall:
+                        continue
+                    elif direction[1] == j+1 and self.cell_list[i][j].has_right_wall:
+                        continue
+                    else:
+                        self.cell_list[i][j].draw_move(self.cell_list[direction[0]][direction[1]])
+                        end_found = self._solve_dfs_r(direction[0], direction[1])
+                        if end_found:
+                            return True
+                        self.cell_list[i][j].draw_move(self.cell_list[direction[0]][direction[1]], undo=True)
+                else:
+                    continue
+            else:
+                continue
+        
+        return False
+    
+    def _solve_bfs(self, i,j):
+        to_visit=[]
+        to_visit.append((i,j))
+        while len(to_visit)>0:
+            self._animate(0.05)
+            current_cell = to_visit.pop()
+            self.cell_list[current_cell[0]][current_cell[1]].visited = True
+            if current_cell[0]==self.num_rows-1 and current_cell[1]==self.num_cols-1:
+                return True
+            
+            for direction in [(current_cell[0]+1,current_cell[1]), (current_cell[0]-1,current_cell[1]), (current_cell[0], current_cell[1]+1), (current_cell[0],current_cell[1]-1)]:
+                if(direction[0]>=0 and direction[0]<=self.num_rows-1 and direction[1]>=0 and direction[1]<=self.num_cols-1):
+                    if not self.cell_list[direction[0]][direction[1]].visited:
+                        if direction[0] == current_cell[0]-1 and self.cell_list[current_cell[0]][current_cell[1]].has_top_wall:
+                            continue
+                        elif direction[0] == current_cell[0]+1 and self.cell_list[current_cell[0]][current_cell[1]].has_bottom_wall:
+                            continue
+                        elif direction[1] == current_cell[1]-1 and self.cell_list[current_cell[0]][current_cell[1]].has_left_wall:
+                            continue
+                        elif direction[1] == current_cell[1]+1 and self.cell_list[current_cell[0]][current_cell[1]].has_right_wall:
+                            continue
+                        else:
+                            to_visit=[direction] + to_visit
+                            self.cell_list[current_cell[0]][current_cell[1]].draw_move(self.cell_list[direction[0]][direction[1]])
+                            
+                    else:
+                        continue
+                else:
+                    continue
+        return False
+            

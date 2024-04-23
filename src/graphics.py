@@ -63,9 +63,9 @@ class Cell:
         end_x = ((to_cell.point_bottom_right.x - to_cell.point_top_left.x)/2) +  to_cell.point_top_left.x
         end_y = ((to_cell.point_bottom_right.y - to_cell.point_top_left.y)/2) +  to_cell.point_top_left.y
 
-        fill_color = "gray"
+        fill_color = "red"
         if undo:
-            fill_color = "red"
+            fill_color = "gray"
 
         start_point = Point(start_x, start_y)
         end_point = Point(end_x, end_y)
