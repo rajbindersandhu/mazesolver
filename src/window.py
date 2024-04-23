@@ -24,6 +24,7 @@ class Window:
     
     def close(self):
         self.running = False
+        self.root_widget.destroy()
     
     def draw_line(self, line, fill_color="black"):
         line.draw(self.canvas, fill_color)
