@@ -34,7 +34,9 @@ The application develops maze using *'DFS'*, it starts breaking walls of cell ra
 
 Now once the maze is ready, the application depending on the search algorithm selected, starts searching a way out from start to exit.
 
+**Example for DFS**
 ![DFS search](./images//Maze_dfs.PNG)
 
+**Example  for BFS**
 ![BFS search](./images/Maze_bfs.PNG)
 
