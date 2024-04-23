@@ -54,7 +54,7 @@ def infoWindow():
     # Dropdown menu for algorithm selection
     frame3 = Frame(tk, width=800, height=600)
     frame3.pack(fill="x")
-    drop_label = Label(frame3, text="Select Searc Algorithm", font=("Arial", 18))
+    drop_label = Label(frame3, text="Select Search Algorithm", font=("Arial", 18))
     drop_label.pack(side="left")
     algorithm_var = StringVar(frame3)
     algorithm_var.set("DFS")  # Default selection
